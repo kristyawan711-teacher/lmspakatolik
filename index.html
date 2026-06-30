@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PAK LMS - Pendidikan Agama Katolik</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fcf4f4',
+              100: '#f9e7e7',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b', // Warna utama (Maroon Elegan)
+              900: '#7f1d1d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Utility untuk menyembunyikan scrollbar tapi tetap bisa di-scroll */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Animasi masuk yang mulus */
+    .animate-fade-in {
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Style untuk state aktif (JS mengontrol class 'active') */
+    .class-btn.active {
+      border-color: #991b1b;
+      background-color: #fcf4f4;
+      color: #991b1b;
+    }
+    .nav-tab.active {
+      color: #991b1b;
+      border-bottom-color: #991b1b;
+    }
+    
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden">
+
+  <!-- ==================== LOGIN PAGE ==================== -->
+  <div id="loginPage" class="h-full w-full flex items-center justify-center p-4 relative">
+    
+    <!-- Latar Belakang Dekoratif -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-brand-100/50 blur-3xl"></div>
+      <div class="absolute top-[60%] -right-[10%] w-[40%] h-[40%] rounded-full bg-yellow-100/40 blur-3xl"></div>
+    </div>
+
+    <!-- Kotak Login -->
+    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 w-full max-w-md z-10 animate-fade-in border border-slate-100">
+      
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-brand-50 text-brand-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="cross" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 mb-1">PAK LMS</h1>
+        <p class="text-slate-500 text-sm font-medium">Pendidikan Agama Katolik</p>
+      </div>
+
+      <div id="errorMsg" class="hidden bg-red-50 text-brand-600 border border-red-100 p-3 rounded-xl mb-6 text-sm flex items-start gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 mt-0.5 flex-shrink-0"></i>
+        <span id="errorText"></span>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+          <input type="text" id="fullName" placeholder="Masukkan nama Anda" required
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all text-sm">
+        </div>
+        
+        <div>
+          <label for="presenceNumber" class="block text-sm font-semibold text-slate-700 mb-2">Nomor Presensi</label>
+          <input type="number" id="presenceNumber" placeholder="Contoh: 12" required
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all text-sm">
+        </div>
+        
+        <div>
+          <label for="pinAccess" class="block text-sm font-semibold text-slate-700 mb-2">PIN Akses</label>
+          <input type="password" id="pinAccess" placeholder="••••••" required
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-600 transition-all text-sm">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Kelas</label>
+          <div class="flex gap-2">
+            <button type="button" class="class-btn flex-1 py-2.5 border-2 border-slate-100 rounded-xl text-slate-600 font-semibold text-sm transition-all hover:border-slate-200" data-class="7">7</button>
+            <button type="button" class="class-btn flex-1 py-2.5 border-2 border-slate-100 rounded-xl text-slate-600 font-semibold text-sm transition-all hover:border-slate-200" data-class="8">8</button>
+            <button type="button" class="class-btn flex-1 py-2.5 border-2 border-slate-100 rounded-xl text-slate-600 font-semibold text-sm transition-all hover:border-slate-200" data-class="9">9</button>
+          </div>
+        </div>
+        
+        <button type="submit" class="w-full py-3.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-brand-800/20 mt-2">
+          Masuk Sekarang
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN PAGE ==================== -->
+  <div id="mainPage" class="hidden h-full flex flex-col bg-slate-50">
+    
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 sticky top-0 z-20 flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-800">
+          <i data-lucide="book-open" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 id="userName" class="text-sm font-bold text-slate-900 leading-tight">Nama Siswa</h2>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-50 text-brand-700">
+              KELAS <span id="userClass" class="ml-1">7</span>
+            </span>
+            <span class="text-xs text-slate-400 font-medium border-l border-slate-200 pl-1.5">Presensi: <span id="userPresence"></span></span>
+          </div>
+        </div>
+      </div>
+      <button onclick="logout()" class="p-2 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="Keluar">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
+    </header>
+
+    <!-- NAVIGATION TABS (Mobile: Bottom, Desktop: Below Header) -->
+    <nav class="bg-white border-t border-slate-200 md:border-t-0 md:border-b flex-shrink-0 z-10 order-last md:order-none pb-safe">
+      <div class="flex overflow-x-auto hide-scrollbar md:px-4">
+        <button class="nav-tab active flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 px-2 md:px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors" onclick="switchTab('beranda', event)">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          <span class="text-[10px] md:text-sm font-bold">Beranda</span>
+        </button>
+        <button class="nav-tab flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 px-2 md:px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors" onclick="switchTab('materi', event)">
+          <i data-lucide="book-text" class="w-5 h-5"></i>
+          <span class="text-[10px] md:text-sm font-bold">Materi</span>
+        </button>
+        <button class="nav-tab flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 px-2 md:px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors" onclick="switchTab('aktivitas', event)">
+          <i data-lucide="pencil-ruler" class="w-5 h-5"></i>
+          <span class="text-[10px] md:text-sm font-bold">Aktivitas</span>
+        </button>
+        <button class="nav-tab flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-2 px-2 md:px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors" onclick="switchTab('tantangan', event)">
+          <i data-lucide="medal" class="w-5 h-5"></i>
+          <span class="text-[10px] md:text-sm font-bold">Tantangan</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <div class="flex-1 overflow-y-auto p-4 md:p-8">
+      
+      <!-- BERANDA -->
+      <div id="beranda" class="content-section animate-fade-in block">
+        <div class="mb-6 md:mb-8">
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Selamat Datang 👋</h1>
+          <p class="text-slate-500 text-sm md:text-base mt-1">Jelajahi ajaran iman Kristiani dan kembangkan spiritualitasmu.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <!-- Card 1 -->
+          <div onclick="switchTab('materi', event)" class="group bg-white border border-slate-100 p-5 rounded-2xl cursor-pointer hover:shadow-lg hover:border-brand-200 transition-all duration-300">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <i data-lucide="book-text"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Materi Kelas</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-4">Pelajari konsep penting dan ajaran untuk mendalami iman.</p>
+            <div class="flex items-center text-xs font-bold text-blue-600 group-hover:text-blue-700">
+              Mulai Belajar <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div onclick="switchTab('aktivitas', event)" class="group bg-white border border-slate-100 p-5 rounded-2xl cursor-pointer hover:shadow-lg hover:border-brand-200 transition-all duration-300">
+            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <i data-lucide="pencil-ruler"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Aktivitas</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-4">Kerjakan tugas dan refleksi interaktif untuk melatih pemahaman.</p>
+            <div class="flex items-center text-xs font-bold text-green-600 group-hover:text-green-700">
+              Lihat Aktivitas <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div onclick="switchTab('tantangan', event)" class="group bg-white border border-slate-100 p-5 rounded-2xl cursor-pointer hover:shadow-lg hover:border-brand-200 transition-all duration-300">
+            <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <i data-lucide="medal"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Tantangan</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-4">Ikuti kuis mingguan, raih poin, dan jadilah yang terbaik.</p>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold">Baru</span>
+              <div class="flex items-center text-xs font-bold text-orange-600 group-hover:text-orange-700">
+                Ikuti <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATERI (Empty State) -->
+      <div id="materi" class="content-section animate-fade-in hidden">
+        <div class="mb-6">
+          <h1 class="text-2xl font-extrabold text-slate-900">Materi Pembelajaran</h1>
+          <p class="text-slate-500 text-sm">Modul dan bahan ajar Kelas <span class="badge-class"></span></p>
+        </div>
+        <div class="bg-white border border-dashed border-slate-300 rounded-2xl p-8 md:p-12 text-center flex flex-col items-center justify-center h-[50vh]">
+          <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="folder-open" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-slate-800 font-bold text-lg mb-2">Belum ada materi</h3>
+          <p class="text-slate-500 text-sm max-w-sm">Guru belum mengunggah materi pembelajaran untuk Kelas <span class="badge-class font-bold text-brand-700"></span>. Silakan periksa kembali nanti.</p>
+        </div>
+      </div>
+
+      <!-- AKTIVITAS (Empty State) -->
+      <div id="aktivitas" class="content-section animate-fade-in hidden">
+        <div class="mb-6">
+          <h1 class="text-2xl font-extrabold text-slate-900">Aktivitas Interaktif</h1>
+          <p class="text-slate-500 text-sm">Tugas dan refleksi untuk Kelas <span class="badge-class"></span></p>
+        </div>
+        <div class="bg-white border border-dashed border-slate-300 rounded-2xl p-8 md:p-12 text-center flex flex-col items-center justify-center h-[50vh]">
+          <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-slate-800 font-bold text-lg mb-2">Semua tugas selesai!</h3>
+          <p class="text-slate-500 text-sm max-w-sm">Kamu tidak memiliki aktivitas atau tugas yang menunggu untuk diselesaikan saat ini.</p>
+        </div>
+      </div>
+
+      <!-- TANTANGAN (Empty State) -->
+      <div id="tantangan" class="content-section animate-fade-in hidden">
+        <div class="mb-6">
+          <h1 class="text-2xl font-extrabold text-slate-900">Tantangan Mingguan</h1>
+          <p class="text-slate-500 text-sm">Uji pemahamanmu dan raih pencapaian.</p>
+        </div>
+        <div class="bg-white border border-dashed border-slate-300 rounded-2xl p-8 md:p-12 text-center flex flex-col items-center justify-center h-[50vh]">
+          <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="trophy" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-slate-800 font-bold text-lg mb-2">Tantangan ditutup</h3>
+          <p class="text-slate-500 text-sm max-w-sm">Tantangan untuk minggu ini belum dibuka. Persiapkan dirimu untuk kuis selanjutnya!</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Session management
+    let currentSession = {
+      fullName: '',
+      presenceNumber: '',
+      selectedClass: '' // Diubah menjadi kosong secara default agar user harus memilih
+    };
+
+    // Class selector buttons logic
+    document.querySelectorAll('.class-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active state from all buttons
+        document.querySelectorAll('.class-btn').forEach(b => {
+          b.classList.remove('active');
+        });
+
+        // Add active state to clicked button
+        this.classList.add('active');
+
+        // Store selected class
+        currentSession.selectedClass = this.dataset.class;
+      });
+    });
+
+    // Form submit handler
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById('fullName').value;
+      const presenceNumber = document.getElementById('presenceNumber').value;
+      const pinAccess = document.getElementById('pinAccess').value;
+      const selectedClass = currentSession.selectedClass;
+
+      hideError();
+
+      // Simple Validation
+      if (!fullName.trim()) return showError('Nama lengkap wajib diisi.');
+      if (!presenceNumber.trim()) return showError('Nomor presensi wajib diisi.');
+      if (!pinAccess) return showError('PIN akses wajib diisi.');
+      if (!selectedClass) return showError('Silakan pilih kelas terlebih dahulu.');
+
+      // Mock Save Session
+      currentSession.fullName = fullName;
+      currentSession.presenceNumber = presenceNumber;
+      sessionStorage.setItem('pak_session', JSON.stringify(currentSession));
+
+      updateUIInfo();
+      showMainPage();
+    });
+
+    // Helper: Show Error
+    function showError(message) {
+      const errorMsg = document.getElementById('errorMsg');
+      const errorText = document.getElementById('errorText');
+      errorText.textContent = message;
+      errorMsg.classList.remove('hidden');
+    }
+
+    // Helper: Hide Error
+    function hideError() {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.classList.add('hidden');
+    }
+
+    // Helper: Update Dashboard UI with User Data
+    function updateUIInfo() {
+      // Update Header
+      document.getElementById('userName').textContent = currentSession.fullName;
+      document.getElementById('userClass').textContent = currentSession.selectedClass;
+      document.getElementById('userPresence').textContent = currentSession.presenceNumber;
+      
+      // Update placeholder spans in content pages
+      document.querySelectorAll('.badge-class').forEach(el => {
+        el.textContent = currentSession.selectedClass;
+      });
+    }
+
+    // Navigation: Show Main Page
+    function showMainPage() {
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('mainPage').classList.remove('hidden');
+      lucide.createIcons(); // Re-render icons if needed
+    }
+
+    // Navigation: Tab Switcher
+    window.switchTab = function(tabName, event) {
+      if(event) event.preventDefault();
+
+      // 1. Hide all content sections
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+        section.classList.remove('block');
+      });
+
+      // 2. Remove active state from all tabs
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // 3. Show targeted section
+      const targetSection = document.getElementById(tabName);
+      if(targetSection) {
+        targetSection.classList.remove('hidden');
+        targetSection.classList.add('block');
+      }
+
+      // 4. Add active state to clicked tab (or the one matching the name)
+      if(event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      } else {
+        // Fallback for direct triggers without click event
+        const tabs = document.querySelectorAll('.nav-tab');
+        if(tabName === 'beranda') tabs[0].classList.add('active');
+        if(tabName === 'materi') tabs[1].classList.add('active');
+        if(tabName === 'aktivitas') tabs[2].classList.add('active');
+        if(tabName === 'tantangan') tabs[3].classList.add('active');
+      }
+    }
+
+    // Logout Function
+    window.logout = function() {
+      sessionStorage.removeItem('pak_session');
+      currentSession = { fullName: '', presenceNumber: '', selectedClass: '' };
+      
+      // Reset Form UI
+      document.getElementById('loginForm').reset();
+      document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
+      hideError();
+
+      // Return to Login
+      document.getElementById('mainPage').classList.add('hidden');
+      document.getElementById('loginPage').classList.remove('hidden');
+      
+      // Reset tab to Beranda
+      switchTab('beranda');
+    }
+
+    // On Load Initializer
+    window.addEventListener('load', function() {
+      const savedSession = sessionStorage.getItem('pak_session');
+      if (savedSession) {
+        currentSession = JSON.parse(savedSession);
+        updateUIInfo();
+        showMainPage();
+      }
+    });
+  </script>
+</body>
+</html>
