@@ -317,7 +317,25 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    // Import SDK Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Konfigurasi Firebase dari akun Anda
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-T-SGTbo41uMIqA4HU9XMiC0xlXPlHso",
+      authDomain: "pak-lms-sekolah.firebaseapp.com",
+      projectId: "pak-lms-sekolah",
+      storageBucket: "pak-lms-sekolah.firebasestorage.app",
+      messagingSenderId: "831109546389",
+      appId: "1:831109546389:web:739b68381cadebc42d769c"
+    };
+
+    // Inisialisasi Firebase & Firestore Database
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     // Initialize Lucide icons
     lucide.createIcons();
 
@@ -333,21 +351,16 @@
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         
-        // Remove active state from all buttons
         document.querySelectorAll('.class-btn').forEach(b => {
           b.classList.remove('active');
         });
-
-        // Add active state to clicked button
         this.classList.add('active');
-
-        // Store selected class
         currentSession.selectedClass = this.dataset.class;
       });
     });
 
-    // Form submit handler
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    // Form submit handler (Sudah Terhubung ke Database!)
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const fullName = document.getElementById('fullName').value;
@@ -363,13 +376,43 @@
       if (!pinAccess) return showError('PIN akses wajib diisi.');
       if (!selectedClass) return showError('Silakan pilih kelas terlebih dahulu.');
 
-      // Mock Save Session
-      currentSession.fullName = fullName;
-      currentSession.presenceNumber = presenceNumber;
-      sessionStorage.setItem('pak_session', JSON.stringify(currentSession));
+      // Ubah teks tombol menjadi loading
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Memproses...';
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-75', 'cursor-wait');
 
-      updateUIInfo();
-      showMainPage();
+      try {
+        // 1. Buat ID unik berdasarkan kelas dan absen, misal: "kelas7_12"
+        const studentId = `kelas${selectedClass}_${presenceNumber}`;
+        const studentRef = doc(db, 'students', studentId);
+
+        // 2. Simpan/Update data siswa ke Firestore Database
+        await setDoc(studentRef, {
+          namaLengkap: fullName,
+          nomorPresensi: presenceNumber,
+          kelas: selectedClass,
+          pinAkses: pinAccess,
+          terakhirLogin: serverTimestamp() // Catat waktu login yang akurat
+        }, { merge: true });
+
+        // 3. Simpan sesi lokal agar tidak logout saat halaman di-refresh
+        currentSession.fullName = fullName;
+        currentSession.presenceNumber = presenceNumber;
+        sessionStorage.setItem('pak_session', JSON.stringify(currentSession));
+
+        updateUIInfo();
+        showMainPage();
+      } catch (error) {
+        console.error("Error Database: ", error);
+        showError('Gagal terhubung ke database. Cek koneksi internet atau setelan Firebase Anda.');
+      } finally {
+        // Kembalikan tombol seperti semula
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-75', 'cursor-wait');
+      }
     });
 
     // Helper: Show Error
@@ -388,12 +431,10 @@
 
     // Helper: Update Dashboard UI with User Data
     function updateUIInfo() {
-      // Update Header
       document.getElementById('userName').textContent = currentSession.fullName;
       document.getElementById('userClass').textContent = currentSession.selectedClass;
       document.getElementById('userPresence').textContent = currentSession.presenceNumber;
       
-      // Update placeholder spans in content pages
       document.querySelectorAll('.badge-class').forEach(el => {
         el.textContent = currentSession.selectedClass;
       });
@@ -406,30 +447,25 @@
       lucide.createIcons();
     }
 
-    // Navigation: Tab Switcher
+    // Navigation: Tab Switcher (Harus di-assign ke window karena kita pakai type="module")
     window.switchTab = function(tabName, event) {
       if(event) event.preventDefault();
 
-      // 1. Hide all content sections
       document.querySelectorAll('.content-section').forEach(section => {
         section.classList.add('hidden');
         section.classList.remove('block');
       });
 
-      // 2. Remove active state from all tabs
       document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
       });
 
-      // 3. Show targeted section
       const targetSection = document.getElementById(tabName);
       if(targetSection) {
         targetSection.classList.remove('hidden');
         targetSection.classList.add('block');
       }
 
-      // 4. Add active state to correct tab
-      // Mencari tombol nav-tab mana yang memiliki onclick yang memanggil fungsi ini untuk tabName
       const tabs = document.querySelectorAll('.nav-tab');
       const tabIndexMap = {
         'beranda': 0,
@@ -449,16 +485,12 @@
       sessionStorage.removeItem('pak_session');
       currentSession = { fullName: '', presenceNumber: '', selectedClass: '' };
       
-      // Reset Form UI
       document.getElementById('loginForm').reset();
       document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
       hideError();
 
-      // Return to Login
       document.getElementById('mainPage').classList.add('hidden');
       document.getElementById('loginPage').classList.remove('hidden');
-      
-      // Reset tab to Beranda
       switchTab('beranda');
     }
 
